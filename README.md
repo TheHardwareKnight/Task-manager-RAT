@@ -30,7 +30,7 @@ This project is a Remote Access Tool (RAT) focused on process monitoring and man
 ## Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/TheHardwareKnight/Task-manager-RAT
 
 # Navigate into the project directory
-cd your-repo-name
+cd Task-manager-RAT
