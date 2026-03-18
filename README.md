@@ -1,33 +1,44 @@
-# Remote Access Tool (RAT) – Process Monitoring & Management
+# Remote Access Tool – Process Monitoring & Management
 
 ## Overview
-This project is a Remote Access Tool (RAT) focused on process monitoring and management. It enables a client to retrieve real-time information about active programs on a host device, terminate processes, and collect usage statistics.
+This project provides a system for monitoring and managing processes across multiple devices using a central server. A Raspberry Pi (Pi 4 or Pi 5) acts as the management server, while devices send data and receive commands.
 
 ## Features
-- **Real-Time Process Monitoring** – View all currently running programs on the host system
-- **Task Management** – Terminate active processes remotely
-- **Usage Analytics** – Track most-used applications and runtime
-- **Data Reporting** – Collect and display statistics on program usage
-- **Flexible Deployment** – Run on LAN or over the internet (self-hosted)
-- **Configurable** – Device and server settings stored in professional config files
+- Real-time process monitoring
+- Remote task termination
+- Multi-device support
+- LAN-based or self-hosted deployment
+- Config-driven setup
 
-## Use Cases
-- System supervision across multiple devices
-- Monitoring application usage
-- Remote task management for authorized administrative purposes
+---
 
-## How It Works
-1. The host device runs the RAT service, which collects process data.
-2. The client connects to the host.
-3. The client can:
-   - Request a list of active programs
-   - End specific tasks
-   - Retrieve usage statistics
+## Architecture
+Device → Pi Server → Dashboard
 
-## Installation
+- Devices send process data to the Pi
+- Pi stores and serves device data
+- Dashboard displays devices and sends commands
+
+---
+
+## Supported Hardware
+
+### Raspberry Pi 4
+- Recommended OS: Raspberry Pi OS (64-bit)
+- RAM: 2GB+ recommended
+- Works well for small to medium setups
+
+### Raspberry Pi 5
+- Faster CPU and networking
+- Better for multiple devices and real-time updates
+- Recommended for long-term use
+
+---
+
+## Pi Server Setup
+
+### 1. Install dependencies
 ```bash
-# Clone the repository
-git clone https://github.com/TheHardwareKnight/Task-manager-RAT
-
-# Navigate into the project directory
-cd Task-manager-RAT
+sudo apt update
+sudo apt install python3 python3-pip -y
+pip3 install flask
