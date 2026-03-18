@@ -26,10 +26,10 @@ This project is a Remote Access Tool (RAT) focused on process monitoring and man
 
 ## Project Structure
 my-rat-project/
-├── backend/        # API server (Flask)
-├── device/         # Client script (runs on host device)
-├── frontend/       # Web dashboard (HTML/JS)
-├── config/         # Configuration files
+├── backend/
+├── device/
+├── frontend/
+├── config/
 ├── README.md
 └── LICENSE
 
