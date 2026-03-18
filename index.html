@@ -2,207 +2,157 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Device Manager Dashboard</title>
+<title>Device Manager</title>
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
 
-    .container {
-        width: 90%;
-        max-width: 1000px;
-        background: #1e293b;
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
+/* Container */
+.container {
+    width: 900px;
+}
 
-    h1 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
+/* Grid */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
 
-    .flex {
-        display: flex;
-        gap: 20px;
-    }
+/* Card */
+.card {
+    background: #1e293b;
+    border-radius: 15px;
+    padding: 18px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-    .panel {
-        flex: 1;
-        background: #0f172a;
-        border-radius: 12px;
-        padding: 15px;
-        overflow-y: auto;
-        max-height: 400px;
-    }
+/* Empty card */
+.empty {
+    background: transparent;
+    border: 2px dashed rgba(255,255,255,0.2);
+}
 
-    .device {
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        background: #1e293b;
-        cursor: pointer;
-        transition: 0.2s;
-    }
+/* Text */
+.device-name {
+    font-weight: bold;
+    font-size: 15px;
+}
 
-    .device:hover {
-        background: #334155;
-    }
+.process-count {
+    font-size: 13px;
+    opacity: 0.8;
+}
 
-    .device.active {
-        background: #3b82f6;
-    }
+.actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* <-- adds space between buttons */
+}
 
-    .process {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px;
-        margin-bottom: 6px;
-        background: #1e293b;
-        border-radius: 8px;
-    }
+/* Buttons */
+button {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: white;
+}
 
-    button {
-        background: #ef4444;
-        border: none;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
+.end-btn {
+    background: #ef4444;
+}
 
-    button:hover {
-        background: #dc2626;
-    }
+.monitor-btn {
+    background: #3b82f6;
+}
 
-    .empty {
-        text-align: center;
-        opacity: 0.6;
-    }
+/* Empty button outlines */
+.outline-btn {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.3);
+}
+
+/* Scribble placeholders */
+.placeholder {
+    height: 10px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.placeholder.short {
+    width: 60%;
+}
+
+.placeholder.long {
+    width: 80%;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-    <h1>Device Manager</h1>
-
-    <div class="flex">
-        <!-- Device List -->
-        <div class="panel" id="deviceList">
-            <div class="empty">Loading devices...</div>
-        </div>
-
-        <!-- Process Viewer -->
-        <div class="panel" id="processList">
-            <div class="empty">Select a device</div>
-        </div>
-    </div>
+    <div class="grid" id="grid"></div>
 </div>
 
 <script>
-const API_BASE = "https://your-server-url.com"; // CHANGE THIS
+const MAX_CARDS = 9;
 
-let selectedDevice = null;
+// Replace this later with real backend data
+const devices = []; // empty on purpose
 
-// Fetch devices
-async function fetchDevices() {
-    try {
-        const res = await fetch(API_BASE + "/devices");
-        const data = await res.json();
+const grid = document.getElementById("grid");
 
-        renderDevices(data);
-    } catch (err) {
-        document.getElementById("deviceList").innerHTML =
-            "<div class='empty'>Failed to load devices</div>";
-    }
-}
+for (let i = 0; i < MAX_CARDS; i++) {
+    const card = document.createElement("div");
 
-// Render device list
-function renderDevices(devices) {
-    const container = document.getElementById("deviceList");
-    container.innerHTML = "";
+    if (devices[i]) {
+        const device = devices[i];
+        card.className = "card";
 
-    const keys = Object.keys(devices);
+        card.innerHTML = `
+            <div>
+                <div class="device-name">${device.name}</div>
+                <div class="process-count">Processes: ${device.processes}</div>
+            </div>
+            <div class="actions">
+                <button class="monitor-btn">Monitor</button>
+                <button class="end-btn">End Task</button>
+            </div>
+        `;
+    } else {
+        card.className = "card empty";
 
-    if (keys.length === 0) {
-        container.innerHTML = "<div class='empty'>No devices connected</div>";
-        return;
-    }
-
-    keys.forEach(id => {
-        const div = document.createElement("div");
-        div.className = "device";
-        div.innerText = id;
-
-        div.onclick = () => {
-            selectedDevice = id;
-            renderDevices(devices);
-            renderProcesses(devices[id].processes || []);
-        };
-
-        if (id === selectedDevice) {
-            div.classList.add("active");
-        }
-
-        container.appendChild(div);
-    });
-}
-
-// Render processes
-function renderProcesses(processes) {
-    const container = document.getElementById("processList");
-    container.innerHTML = "";
-
-    if (!processes || processes.length === 0) {
-        container.innerHTML = "<div class='empty'>No processes found</div>";
-        return;
+        card.innerHTML = `
+            <div>
+                <div class="placeholder long"></div>
+                <div class="placeholder short"></div>
+            </div>
+            <div class="actions">
+                <button class="outline-btn">Monitor</button>
+                <button class="outline-btn">End Task</button>
+            </div>
+        `;
     }
 
-    processes.forEach(proc => {
-        const div = document.createElement("div");
-        div.className = "process";
-
-        const name = document.createElement("span");
-        name.innerText = proc;
-
-        const btn = document.createElement("button");
-        btn.innerText = "End";
-        btn.onclick = () => sendCommand(proc);
-
-        div.appendChild(name);
-        div.appendChild(btn);
-
-        container.appendChild(div);
-    });
+    grid.appendChild(card);
 }
-
-// Send command
-async function sendCommand(target) {
-    if (!selectedDevice) return;
-
-    await fetch(API_BASE + "/command", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            device_id: selectedDevice,
-            command: "end_task",
-            target: target
-        })
-    });
-}
-
-// Auto refresh
-setInterval(fetchDevices, 3000);
-fetchDevices();
 </script>
 
 </body>
