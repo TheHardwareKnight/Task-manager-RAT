@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Device Manager Dashboard</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1000px;
+        background: #1e293b;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .flex {
+        display: flex;
+        gap: 20px;
+    }
+
+    .panel {
+        flex: 1;
+        background: #0f172a;
+        border-radius: 12px;
+        padding: 15px;
+        overflow-y: auto;
+        max-height: 400px;
+    }
+
+    .device {
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: #1e293b;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .device:hover {
+        background: #334155;
+    }
+
+    .device.active {
+        background: #3b82f6;
+    }
+
+    .process {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        margin-bottom: 6px;
+        background: #1e293b;
+        border-radius: 8px;
+    }
+
+    button {
+        background: #ef4444;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #dc2626;
+    }
+
+    .empty {
+        text-align: center;
+        opacity: 0.6;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Device Manager</h1>
+
+    <div class="flex">
+        <!-- Device List -->
+        <div class="panel" id="deviceList">
+            <div class="empty">Loading devices...</div>
+        </div>
+
+        <!-- Process Viewer -->
+        <div class="panel" id="processList">
+            <div class="empty">Select a device</div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_BASE = "https://your-server-url.com"; // CHANGE THIS
+
+let selectedDevice = null;
+
+// Fetch devices
+async function fetchDevices() {
+    try {
+        const res = await fetch(API_BASE + "/devices");
+        const data = await res.json();
+
+        renderDevices(data);
+    } catch (err) {
+        document.getElementById("deviceList").innerHTML =
+            "<div class='empty'>Failed to load devices</div>";
+    }
+}
+
+// Render device list
+function renderDevices(devices) {
+    const container = document.getElementById("deviceList");
+    container.innerHTML = "";
+
+    const keys = Object.keys(devices);
+
+    if (keys.length === 0) {
+        container.innerHTML = "<div class='empty'>No devices connected</div>";
+        return;
+    }
+
+    keys.forEach(id => {
+        const div = document.createElement("div");
+        div.className = "device";
+        div.innerText = id;
+
+        div.onclick = () => {
+            selectedDevice = id;
+            renderDevices(devices);
+            renderProcesses(devices[id].processes || []);
+        };
+
+        if (id === selectedDevice) {
+            div.classList.add("active");
+        }
+
+        container.appendChild(div);
+    });
+}
+
+// Render processes
+function renderProcesses(processes) {
+    const container = document.getElementById("processList");
+    container.innerHTML = "";
+
+    if (!processes || processes.length === 0) {
+        container.innerHTML = "<div class='empty'>No processes found</div>";
+        return;
+    }
+
+    processes.forEach(proc => {
+        const div = document.createElement("div");
+        div.className = "process";
+
+        const name = document.createElement("span");
+        name.innerText = proc;
+
+        const btn = document.createElement("button");
+        btn.innerText = "End";
+        btn.onclick = () => sendCommand(proc);
+
+        div.appendChild(name);
+        div.appendChild(btn);
+
+        container.appendChild(div);
+    });
+}
+
+// Send command
+async function sendCommand(target) {
+    if (!selectedDevice) return;
+
+    await fetch(API_BASE + "/command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            device_id: selectedDevice,
+            command: "end_task",
+            target: target
+        })
+    });
+}
+
+// Auto refresh
+setInterval(fetchDevices, 3000);
+fetchDevices();
+</script>
+
+</body>
+</html>
